@@ -1,17 +1,21 @@
-import { useEffect, useRef, useState } from 'react'
 import { Decorations } from './Decorations.jsx'
 import { config } from '../config.js'
+import { photos } from '../photos.js'
 import './MemoryGallery.css'
 
 /**
- * Scene 3 — the sibling memory gallery.
+ * Scene 3 — the shoebox.
  *
- * Photos themselves are owned by App so they survive moving between
- * scenes; this component only decides which one is on stage. Everything
- * is sized against the viewport so the scene never scrolls.
+ * Every image in public/photos/ is listed at build time (see the
+ * `photo-manifest` plugin in vite.config.js), so this scene is read-only:
+ * it lays all of them out as a scrapbook, one frame style per photo.
  */
 
 const { gallery } = config
+
+const FRAMES = ['polaroid', 'tape', 'glass', 'stamp', 'sticker']
+const TILTS = ['-2.4deg', '1.8deg', '-1.2deg', '2.6deg', '-2deg', '1.4deg']
+const ARTS = ['star', 'heart', 'sparkle', 'moon', 'cloud']
 
 // The last word of the heading gets the gradient accent, matching the
 // question scenes.
@@ -19,118 +23,67 @@ const titleCut = gallery.title.lastIndexOf(' ')
 const titleLead = gallery.title.slice(0, titleCut)
 const titleAccent = gallery.title.slice(titleCut + 1)
 
-function ChevronIcon({ direction }) {
+function StickerArt({ name }) {
+  if (name === 'heart') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path
+          d="M12 20.2S3.6 15 3.6 9.2A4.4 4.4 0 0 1 12 7a4.4 4.4 0 0 1 8.4 2.2c0 5.8-8.4 11-8.4 11Z"
+          fill="currentColor"
+        />
+      </svg>
+    )
+  }
+
+  if (name === 'sparkle') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path
+          d="M12 2.6c.5 4.6 1.6 6.1 6.6 6.7-4.9.7-6.1 2.1-6.6 6.6-.5-4.5-1.7-5.9-6.6-6.6 5-.6 6.1-2.1 6.6-6.7Z"
+          fill="currentColor"
+        />
+        <path
+          d="M18.2 15.2c.3 2 .8 2.6 2.9 2.9-2.1.3-2.6.9-2.9 2.9-.3-2-.8-2.6-2.9-2.9 2.1-.3 2.6-.9 2.9-2.9Z"
+          fill="currentColor"
+          opacity=".72"
+        />
+      </svg>
+    )
+  }
+
+  if (name === 'moon') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path
+          d="M15.5 3.2a8.8 8.8 0 1 0 5.2 12.4A9.4 9.4 0 0 1 15.5 3.2Z"
+          fill="currentColor"
+        />
+      </svg>
+    )
+  }
+
+  if (name === 'cloud') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path
+          d="M7.2 18.2a3.7 3.7 0 0 1-.3-7.4 5 5 0 0 1 9.5-1.1 3.9 3.9 0 0 1 1.2 7.6l-.5.9H7.2Z"
+          fill="currentColor"
+        />
+      </svg>
+    )
+  }
+
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path
-        d={direction === 'prev' ? 'M14.5 5.5 8 12l6.5 6.5' : 'M9.5 5.5 16 12l-6.5 6.5'}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="m12 2.9 2.6 5.9 6.4.6-4.8 4.3 1.4 6.3L12 16.7 6.4 20l1.4-6.3L3 9.4l6.4-.6L12 2.9Z"
+        fill="currentColor"
       />
     </svg>
   )
 }
 
-function AddIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path
-        d="M12 6v12M6 12h12"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
-
-function PhotoIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <rect
-        x="3"
-        y="4.5"
-        width="18"
-        height="15"
-        rx="3.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-      <circle cx="9" cy="10" r="1.7" fill="currentColor" />
-      <path
-        d="M4.8 17.2l4.4-4.2 3 2.9 3-2.4 3.9 3.7"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
-
-export default function MemoryGallery({ photos, onAdd, onNext }) {
-  const [active, setActive] = useState(0)
-  const [dragging, setDragging] = useState(false)
-
-  const inputRef = useRef(null)
-  const stripRef = useRef(null)
-  const thumbRefs = useRef([])
-
-  // Never point past the end, even if the list changes under us.
-  const index = photos.length === 0 ? 0 : Math.min(active, photos.length - 1)
-
-  // Keep the active thumbnail centred in its own horizontal strip.
-  useEffect(() => {
-    const strip = stripRef.current
-    const thumb = thumbRefs.current[index]
-
-    if (!strip || !thumb) return
-
-    strip.scrollTo({
-      left: thumb.offsetLeft - (strip.clientWidth - thumb.clientWidth) / 2,
-      behavior: 'smooth',
-    })
-  }, [index, photos.length])
-
-  const openPicker = () => inputRef.current?.click()
-
-  const handleFiles = (fileList) => {
-    if (!fileList || fileList.length === 0) return
-
-    const added = onAdd(fileList)
-    if (added && added.length > 0 && photos.length > 0) {
-      // Jump to the first photo of the batch that was just added.
-      setActive(photos.length)
-    }
-  }
-
-  const handleChange = (event) => {
-    handleFiles(event.target.files)
-    // Allow picking the same file again later.
-    event.target.value = ''
-  }
-
-  const handleDrop = (event) => {
-    event.preventDefault()
-    setDragging(false)
-    handleFiles(event.dataTransfer?.files)
-  }
-
-  const step = (delta) => {
-    if (photos.length < 2) return
-
-    setActive((index) => (index + delta + photos.length) % photos.length)
-  }
-
-  const current = photos[index]
-  const hasPhotos = photos.length > 0
-
+export default function MemoryGallery({ onNext }) {
   return (
     <main className="scene scene--memories" aria-labelledby="memories-title">
       <Decorations variant="dark" />
@@ -144,98 +97,53 @@ export default function MemoryGallery({ photos, onAdd, onNext }) {
           <p className="memories__subtitle">{gallery.subtitle}</p>
         </header>
 
-        <div
-          className={`memories__stage${dragging ? ' is-dragging' : ''}`}
-          onDragOver={(event) => {
-            event.preventDefault()
-            setDragging(true)
-          }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={handleDrop}
-        >
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            hidden
-            onChange={handleChange}
-          />
+        {photos.length > 0 ? (
+          <div className="memories__board">
+            <ul className="memories__grid">
+              {photos.map((photo, index) => {
+                const frame = FRAMES[index % FRAMES.length]
+                const art = ARTS[index % ARTS.length]
 
-          {hasPhotos ? (
-            <>
-              <figure key={current.id} className="memories__frame">
-                <img
-                  className="memories__image"
-                  src={current.url}
-                  alt={`${gallery.counterLabel} ${index + 1} of ${photos.length}`}
-                />
-                <figcaption className="memories__caption">
-                  {gallery.counterLabel} {index + 1} / {photos.length}
-                </figcaption>
-              </figure>
+                return (
+                  <li key={photo.file}>
+                    <figure
+                      className={`memory memory--${frame}`}
+                      style={{
+                        '--tilt': TILTS[index % TILTS.length],
+                        '--delay': `${Math.min(index, 11) * 70}ms`,
+                      }}
+                    >
+                      <span className="memory__paper">
+                        <span className="memory__tape memory__tape--a" aria-hidden="true" />
+                        <span className="memory__tape memory__tape--b" aria-hidden="true" />
 
-              {photos.length > 1 && (
-                <>
-                  <button
-                    type="button"
-                    className="memories__nav memories__nav--prev"
-                    onClick={() => step(-1)}
-                    aria-label={gallery.prevLabel}
-                  >
-                    <ChevronIcon direction="prev" />
-                  </button>
-                  <button
-                    type="button"
-                    className="memories__nav memories__nav--next"
-                    onClick={() => step(1)}
-                    aria-label={gallery.nextLabel}
-                  >
-                    <ChevronIcon direction="next" />
-                  </button>
-                </>
-              )}
-            </>
-          ) : (
-            <button type="button" className="memories__empty" onClick={openPicker}>
-              <span className="memories__empty-icon" aria-hidden="true">
-                <PhotoIcon />
-              </span>
-              <span className="memories__empty-title">{gallery.emptyTitle}</span>
-              <span className="memories__empty-hint">{gallery.emptyHint}</span>
-            </button>
-          )}
-        </div>
+                        <span className="memory__photo">
+                          <img
+                            src={photo.src}
+                            alt={photo.caption || `Memory ${index + 1}`}
+                            loading={index < 3 ? 'eager' : 'lazy'}
+                            decoding="async"
+                          />
+                          <span className="memory__shine" aria-hidden="true" />
+                        </span>
 
-        {hasPhotos && (
-          <div className="memories__strip" ref={stripRef}>
-            {photos.map((photo, i) => (
-              <button
-                key={photo.id}
-                ref={(element) => {
-                  thumbRefs.current[i] = element
-                }}
-                type="button"
-                className={`memories__thumb${i === index ? ' is-active' : ''}`}
-                onClick={() => setActive(i)}
-                aria-label={`Show ${gallery.counterLabel.toLowerCase()} ${i + 1}`}
-                aria-current={i === index ? 'true' : undefined}
-              >
-                <img src={photo.url} alt="" />
-              </button>
-            ))}
+                        <figcaption className="memory__caption">{photo.caption}</figcaption>
+
+                        <span className="memory__sticker" aria-hidden="true">
+                          <StickerArt name={art} />
+                        </span>
+                      </span>
+                    </figure>
+                  </li>
+                )
+              })}
+            </ul>
           </div>
+        ) : (
+          <p className="memories__empty-note">{gallery.emptyTitle}</p>
         )}
 
         <div className="memories__actions">
-          <button
-            type="button"
-            className="btn btn--ghost memories__add"
-            onClick={openPicker}
-          >
-            <AddIcon />
-            {gallery.addLabel}
-          </button>
           <button type="button" className="btn btn--primary" onClick={onNext}>
             {gallery.continueLabel}
           </button>

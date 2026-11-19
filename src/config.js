@@ -11,7 +11,7 @@
  *  Scenes (one at a time, never stacked):
  *    1. The first question
  *    2. The second question
- *    3. Photo upload + memory gallery
+ *    3. The shoebox (every photo in public/photos/)
  *    4. The sibling love letter
  *    5. The Doraemon-inspired Anywhere Door
  * ============================================================
@@ -75,19 +75,19 @@ export const config = {
   },
 
   /* ----------------------------------------------------------
-   *  SCENE 3 — PHOTO UPLOAD & MEMORY GALLERY
+   *  SCENE 3 — THE SHOEBOX
+   *  Every image dropped into public/photos/ appears here as a
+   *  scrapbook card, in file-name order. Captions are derived
+   *  from the file name; override any of them below by file name.
    * ---------------------------------------------------------- */
   gallery: {
     eyebrow: 'The shoebox',
     title: 'A Little Collection of Our Memories',
-    subtitle: 'Add a few photos — they never leave your device.',
-    addLabel: 'Add photos',
+    subtitle: 'A few of my favourite days, kept in one little box.',
     continueLabel: 'Continue',
-    emptyTitle: 'Tap to add the first memory',
-    emptyHint: 'Or drop photos here. Everything stays on this device.',
-    prevLabel: 'Previous photo',
-    nextLabel: 'Next photo',
-    counterLabel: 'Memory',
+    emptyTitle: 'The shoebox is still being filled.',
+    /* e.g. 'beach-day.jpg': 'The day you stole my ice cream' */
+    captions: {},
   },
 
   /* ----------------------------------------------------------

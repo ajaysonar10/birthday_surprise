@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import SceneOne from './components/SceneOne.jsx'
 import SceneTwo from './components/SceneTwo.jsx'
 import MemoryGallery from './components/MemoryGallery.jsx'
@@ -27,45 +27,9 @@ function BackIcon() {
 export default function App() {
   const [scene, setScene] = useState(1)
   const [direction, setDirection] = useState('forward')
-  const [photos, setPhotos] = useState([])
-
-  const photosRef = useRef(photos)
-  const photoId = useRef(0)
-
-  useEffect(() => {
-    photosRef.current = photos
-  }, [photos])
 
   useEffect(() => {
     document.title = withName(config.site.title)
-  }, [])
-
-  // Release the object URLs the gallery created when the app goes away.
-  useEffect(() => {
-    return () => {
-      photosRef.current.forEach((photo) => URL.revokeObjectURL(photo.url))
-    }
-  }, [])
-
-  /* Photos live here, not in Scene 3, so they survive moving between
-     scenes. Only local object URLs are created — nothing is uploaded. */
-  const addPhotos = useCallback((fileList) => {
-    const files = Array.from(fileList ?? []).filter((file) =>
-      file.type.startsWith('image/'),
-    )
-
-    if (files.length === 0) return []
-
-    const added = files.map((file) => {
-      photoId.current += 1
-      return {
-        id: `photo-${photoId.current}`,
-        url: URL.createObjectURL(file),
-      }
-    })
-
-    setPhotos((current) => [...current, ...added])
-    return added
   }, [])
 
   const goTo = useCallback(
@@ -79,12 +43,9 @@ export default function App() {
     [scene],
   )
 
-  /* Replay starts the whole experience over and releases the photo URLs
-     it was holding, so nothing leaks between playthroughs. */
+  /* Replay starts the whole experience over again. The shoebox photos are
+     static files, so there is nothing to reset besides the scene. */
   const restart = useCallback(() => {
-    photosRef.current.forEach((photo) => URL.revokeObjectURL(photo.url))
-    photosRef.current = []
-    setPhotos([])
     setDirection('back')
     setScene(1)
   }, [])
@@ -94,13 +55,7 @@ export default function App() {
       <div key={scene} className={`app__scene app__scene--${direction}`}>
         {scene === 1 && <SceneOne onNext={() => goTo(2)} />}
         {scene === 2 && <SceneTwo onNext={() => goTo(3)} />}
-        {scene === 3 && (
-          <MemoryGallery
-            photos={photos}
-            onAdd={addPhotos}
-            onNext={() => goTo(4)}
-          />
-        )}
+        {scene === 3 && <MemoryGallery onNext={() => goTo(4)} />}
         {scene === 4 && <LetterScene onNext={() => goTo(5)} />}
         {scene === 5 && <DoorScene onReplay={restart} />}
 
