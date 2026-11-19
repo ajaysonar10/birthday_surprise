@@ -60,7 +60,7 @@ You can then upload the contents of `dist/` to any static hosting service.
 All of the text on the website lives in one file: **`src/config.js`**. You do not
 need to touch any component to change what the site says.
 
-- **The name** — edit `person.name`. The default is `Your Special Person`.
+- **The name** — edit `person.name`. The default is `Kalpana Didi`.
 - **The birthday message** — edit the strings inside `welcome` and `birthday`.
 - **The letter** — edit `letter.eyebrow`, `letter.title`, `letter.greeting`, the
   `letter.paragraphs` list, `letter.closing` and `letter.signature`.

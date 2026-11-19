@@ -4,7 +4,7 @@ import { config, withName } from '../config.js'
 import './LetterScene.css'
 
 /**
- * Scene 4 — the love letter from Kalpana Didi.
+ * Scene 4 — the love letter from Ajay.
  *
  * Closed envelope → opening animation → the letter unfolds and its
  * lines reveal one after another. Continue stays disabled until the

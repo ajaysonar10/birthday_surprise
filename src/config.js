@@ -12,7 +12,7 @@
  *    1. The first question
  *    2. The second question
  *    3. The shoebox (every photo in public/photos/)
- *    4. The love letter from Kalpana Didi
+ *    4. The love letter from Ajay
  *    5. The Doraemon-inspired Anywhere Door
  * ============================================================
  */
@@ -22,7 +22,7 @@ export const config = {
    *  WHO IS THIS FOR?
    * ---------------------------------------------------------- */
   person: {
-    name: 'Little Sis',
+    name: 'Kalpana Didi',
   },
 
   /* ----------------------------------------------------------
@@ -31,7 +31,7 @@ export const config = {
   site: {
     title: 'Something special for {name} ✨',
     description:
-      'Five little scenes made by Kalpana Didi — a question, a few memories, a letter and one door.',
+      'Five little scenes made by Ajay — a question, a few memories, a letter and one door.',
   },
 
   /* ----------------------------------------------------------
@@ -112,7 +112,7 @@ export const config = {
       'So here is my promise — wherever life puts us, I am on your side. I will answer the phone, show up when it matters, and keep believing in you on the days you cannot. Same team, always. That part never changes.',
     ],
     closing: 'Always in your corner,',
-    signature: '— Kalpana Didi',
+    signature: '— Ajay',
     continueLabel: 'Continue',
   },
 
@@ -131,7 +131,7 @@ export const config = {
       eyebrow: 'And that is the whole surprise',
       title: 'Wherever you go, I am already there.',
       body: 'Any distance, any city, any year — the door still opens back to me. Same team, always.',
-      signature: '— Kalpana Didi, forever',
+      signature: '— Ajay, forever',
       replayLabel: 'Replay from the start',
     },
   },
