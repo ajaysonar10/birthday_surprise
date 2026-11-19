@@ -455,10 +455,30 @@
   width: auto;
   height: auto;
   max-width: 100%;
-  max-height: clamp(11rem, 46vh, 23rem);
+  max-height: clamp(12rem, 52vh, 26rem);
   border-radius: clamp(10px, 2.2vw, 16px);
   object-fit: contain;
   box-shadow: 0 18px 34px -22px rgba(0, 0, 0, 0.9);
+}
+
+/* Portrait photos should not sit inside wide blurred bands: on roomy
+   screens the frame hugs the picture instead of spanning the whole card. */
+@media (min-width: 640px) {
+  .door-photo {
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  .door-photo__img {
+    max-height: clamp(12rem, 46vh, 28rem);
+  }
+}
+
+@media (min-width: 900px) {
+  .door-photo__img {
+    max-height: clamp(12rem, 50vh, 29rem);
+  }
 }
 
 .door-photo__shine {

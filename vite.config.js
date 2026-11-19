@@ -15,7 +15,8 @@ const IMAGE_RE = /\.(avif|gif|jpe?g|png|webp)$/i
 // A single optional photo for the Anywhere Door finale: public/door-photo.*
 const DOOR_ID = 'virtual:door-photo'
 const RESOLVED_DOOR_ID = '\0' + DOOR_ID
-const DOOR_RE = /^door-photo\.(avif|gif|jpe?g|png|webp)$/i
+// Tolerates double extensions straight from a phone, e.g. door-photo.jpg.jpeg
+const DOOR_RE = /^door-photo(?:\.[a-z0-9]+)+$/i
 
 /** "first-snow_2024.jpg" -> "First snow 2024" */
 function captionFor(file) {
