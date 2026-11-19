@@ -87,7 +87,14 @@ export const config = {
     continueLabel: 'Continue',
     emptyTitle: 'The shoebox is still being filled.',
     /* e.g. 'beach-day.jpg': 'The day you stole my ice cream' */
-    captions: {},
+    captions: {
+      'IMG-20261108-WA0005.jpg.jpeg': 'The whole family, one frame',
+      'IMG-20261112-WA0007(1).jpg.jpeg': 'Dressed up for the festival',
+      'IMG-20261112-WA0011.jpg.jpeg': 'All of us, side by side',
+      'IMG-20261112-WA0012.jpg.jpeg': 'Dinner together, the best kind of noisy',
+      'IMG-20261113-WA0012.jpg.jpeg': 'Squeezed in for one more',
+      'IMG-20261114-WA0012.jpg.jpeg': 'One last selfie before goodbye',
+    },
   },
 
   /* ----------------------------------------------------------
