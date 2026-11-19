@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { doorPhoto } from 'virtual:door-photo'
 import Doraemon from './Doraemon.jsx'
 import { Confetti, Decorations } from './Decorations.jsx'
 import NameText from './NameText.jsx'
@@ -132,13 +133,32 @@ export default function DoorScene({ onReplay }) {
           {isOpen && (
             <article
               ref={finaleRef}
-              className="finale-card"
+              className={`finale-card${doorPhoto ? ' finale-card--photo' : ''}`}
               tabIndex={-1}
               aria-labelledby="finale-title"
             >
-              <span className="finale-card__spark" aria-hidden="true">
-                <SparkIcon />
-              </span>
+              {doorPhoto ? (
+                <figure className="door-photo">
+                  <span className="door-photo__aura" aria-hidden="true" />
+                  <span
+                    className="door-photo__backdrop"
+                    style={{ backgroundImage: `url("${doorPhoto}")` }}
+                    aria-hidden="true"
+                  />
+                  <img className="door-photo__img" src={doorPhoto} alt={door.photoAlt} />
+                  <span className="door-photo__shine" aria-hidden="true" />
+                  <span className="door-photo__spark door-photo__spark--a" aria-hidden="true">
+                    <SparkIcon />
+                  </span>
+                  <span className="door-photo__spark door-photo__spark--b" aria-hidden="true">
+                    <SparkIcon />
+                  </span>
+                </figure>
+              ) : (
+                <span className="finale-card__spark" aria-hidden="true">
+                  <SparkIcon />
+                </span>
+              )}
 
               <p className="eyebrow eyebrow--dark">{door.finale.eyebrow}</p>
               <h2 id="finale-title" className="finale-card__title display display--dark">

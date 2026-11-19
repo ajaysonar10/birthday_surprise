@@ -6,10 +6,16 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 
+const PUBLIC_DIR = 'public'
 const PHOTO_DIR = 'public/photos'
 const VIRTUAL_ID = 'virtual:photos'
 const RESOLVED_ID = '\0' + VIRTUAL_ID
 const IMAGE_RE = /\.(avif|gif|jpe?g|png|webp)$/i
+
+// A single optional photo for the Anywhere Door finale: public/door-photo.*
+const DOOR_ID = 'virtual:door-photo'
+const RESOLVED_DOOR_ID = '\0' + DOOR_ID
+const DOOR_RE = /^door-photo\.(avif|gif|jpe?g|png|webp)$/i
 
 /** "first-snow_2024.jpg" -> "First snow 2024" */
 function captionFor(file) {
@@ -40,9 +46,25 @@ function photoManifest() {
 
     resolveId(id) {
       if (id === VIRTUAL_ID) return RESOLVED_ID
+      if (id === DOOR_ID) return RESOLVED_DOOR_ID
     },
 
     load(id) {
+      if (id === RESOLVED_DOOR_ID) {
+        const dir = path.resolve(root, PUBLIC_DIR)
+        const file = existsSync(dir)
+          ? readdirSync(dir)
+              .filter((name) => DOOR_RE.test(name))
+              .sort((a, b) =>
+                a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }),
+              )[0]
+          : undefined
+
+        return `export const doorPhoto = ${
+          file ? JSON.stringify(`/${encodeURIComponent(file)}`) : 'null'
+        }`
+      }
+
       if (id !== RESOLVED_ID) return
 
       const dir = path.resolve(root, PHOTO_DIR)
@@ -64,11 +86,14 @@ function photoManifest() {
     },
 
     configureServer(server) {
-      const dir = path.resolve(root, PHOTO_DIR)
-      server.watcher.add(dir)
+      const photos = path.resolve(root, PHOTO_DIR)
+      const publicDir = path.resolve(root, PUBLIC_DIR)
+      server.watcher.add(photos)
+      server.watcher.add(publicDir)
 
       const refresh = (file) => {
-        if (path.resolve(file).startsWith(dir)) {
+        const full = path.resolve(file)
+        if (full.startsWith(photos) || DOOR_RE.test(path.basename(full))) {
           server.ws.send({ type: 'full-reload' })
         }
       }
